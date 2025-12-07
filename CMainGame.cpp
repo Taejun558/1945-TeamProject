@@ -1,14 +1,18 @@
 #include "pch.h"
 #include "CMainGame.h"
-#include "CBullet.h"
 #include "CAbstractFactory.h"
-#include "CSubBullet.h"
+#include "CUltimate.h"
+#include "CObjMgr.h"
+#include "CMonster.h"
+#include "CCollisionMgr.h"
+#include "CObj.h"
 
 CMainGame::CMainGame()
-	: m_pPlayer(nullptr) , m_dwTime(GetTickCount())
+	:m_dwTime(GetTickCount())
+	, m_iFPS(0)
 {
+	ZeroMemory(m_szFPS, sizeof(m_szFPS));
 }
-
 CMainGame::~CMainGame()
 {
 	Release();
@@ -16,66 +20,60 @@ CMainGame::~CMainGame()
 
 void CMainGame::Initialize()
 {
+	srand(unsigned int((time(NULL))));
+
 	m_hDC = GetDC(g_hWnd);
 
-	if (!m_pPlayer)
-	{
-		m_pPlayer = new CPlayer;
-		m_pPlayer->Initialize();
-	}
-
-
-	dynamic_cast<CPlayer*>(m_pPlayer)->Set_Bullet(&m_BulletList);
-
-	dynamic_cast<CPlayer*>(m_pPlayer)->Set_SubBullet(&m_SubBulletList);
-
-
+	CObjMgr::Get_Instance()->Add_Object(OBJ_PLAYER, CAbstractFactory<CPlayer>::Create());
+	
 }
-
 void CMainGame::Update()
 {
-	m_pPlayer->Update();
+	static DWORD dwLastFire = 0;
+	DWORD dwNow = GetTickCount();
+	if (dwNow - dwLastFire > 5000)
+	{
+		for (int i = 0; i < 15; ++i)
+		{
+			CObjMgr::Get_Instance()->Add_Object(OBJ_MONSTER, CAbstractFactory<CMonster>::
+				Create(rand() % WINCX, rand() % 200 - 100));
+		}
+		dwLastFire = dwNow;
+		dwNow = GetTickCount();
+	}
+	
+	CObjMgr::Get_Instance()->Update();
 
-	for (auto& pBullet : m_BulletList)
-		pBullet->Update();
-
-	for (auto& pBullet : m_SubBulletList)
-		pBullet->Update();
 }
 
 void CMainGame::Late_Update()
 {
-	m_pPlayer->Late_Update();
+	CObjMgr::Get_Instance()->Late_Update();
 }
 
 void CMainGame::Render()
 {
 	Rectangle(m_hDC, 0, 0, WINCX, WINCY);
 
-	m_pPlayer->Render(m_hDC);
+#pragma region FPS Ç¥½Ã
+	CObjMgr::Get_Instance()->Render(m_hDC);
 
-	for (auto& pBullet : m_BulletList)
-	{
-		if (pBullet != nullptr)
-			pBullet->Render(m_hDC);
-	}
+	++m_iFPS;
 
-	for (auto& pBullet : m_SubBulletList)
+	if (m_dwTime + 1000 < GetTickCount())
 	{
-		if (pBullet != nullptr)
-			pBullet->Render(m_hDC);
+		swprintf_s(m_szFPS, L"FPS : %d", m_iFPS);
+		SetWindowText(g_hWnd, m_szFPS);
+
+		m_iFPS = 0;
+		m_dwTime = GetTickCount();
 	}
+#pragma endregion
 }
 
 void CMainGame::Release()
 {
-	Safe_Delete<CObj*>(m_pPlayer);
-
-	for_each(m_BulletList.begin(), m_BulletList.end(), Safe_Delete<CObj*>);
-	m_BulletList.clear();
-
-	for_each(m_SubBulletList.begin(), m_SubBulletList.end(), Safe_Delete<CObj*>);
-	m_SubBulletList.clear();
+	CObjMgr::Destroy_Instance();
 
 	ReleaseDC(g_hWnd, m_hDC);
 }

@@ -18,9 +18,9 @@ public:
 
 private:
 	HDC		m_hDC;
-	CObj* m_pPlayer;
-	list<CObj*>m_BulletList;
-	list<CObj*>m_SubBulletList;
-	DWORD	m_dwTime;
+	
+	DWORD		m_dwTime;
+	int			m_iFPS;
+	TCHAR		m_szFPS[32];
 };
 
