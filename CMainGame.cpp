@@ -6,6 +6,7 @@
 #include "CMonster.h"
 #include "CCollisionMgr.h"
 #include "CObj.h"
+#include "CBossMonster.h"
 
 CMainGame::CMainGame()
 	:m_dwTime(GetTickCount())
@@ -25,10 +26,17 @@ void CMainGame::Initialize()
 	m_hDC = GetDC(g_hWnd);
 
 	CObjMgr::Get_Instance()->Add_Object(OBJ_PLAYER, CAbstractFactory<CPlayer>::Create());
+
+
 	
 }
 void CMainGame::Update()
 {
+
+
+
+
+
 	static DWORD dwLastFire = 0;
 	DWORD dwNow = GetTickCount();
 	if (dwNow - dwLastFire > 5000)
@@ -42,6 +50,9 @@ void CMainGame::Update()
 		dwNow = GetTickCount();
 	}
 	
+
+
+
 	CObjMgr::Get_Instance()->Update();
 
 }

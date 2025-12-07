@@ -43,12 +43,17 @@ public:
 
 	void Delete_All(OBJID eID);
 
+
+
 	CObj* Create_Item(float x, float y);
 
 private:
 	static CObjMgr* m_pInstance;
 
 	static int iScore;
+
+	
+
 
 	list<CObj*> m_ObjList[OBJ_END];
 };	

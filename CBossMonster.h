@@ -1,30 +1,26 @@
 #pragma once
 #include "CObj.h"
-class CMonster : public CObj
+
+
+class CBossMonster : public CObj
 {
 public:
-	CMonster();
-	virtual ~CMonster();
-public:
+	CBossMonster();
+	virtual ~CBossMonster();
 
+public:
 	// CObj을(를) 통해 상속됨
 	void Initialize() override;
 	int Update() override;
 	void Late_Update() override;
 	void Render(HDC hDC) override;
+
+	void FaceRender(HDC hDC);
 	void Release() override;
 
 	void ResolveCollision();
 
-	CObj* Create_Bullet();
-
-private:
-	float fLimitY = rand() % 100 + 100.f;
-
-	float m_fTargetX;
-	float m_fTargetY;
 
 
-	DWORD m_dwLastFire = 0;
 };
 

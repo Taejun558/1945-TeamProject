@@ -43,7 +43,10 @@ int CPlayer::Update()
 
 	Key_Input();
 
-	
+	if (m_fHP == 0)
+	{
+		m_fHP = m_fMaxHP;
+	}
 
 
 
@@ -159,19 +162,18 @@ void CPlayer::Render(HDC hDC)
 #pragma region 체력
 
 	TCHAR szText[32];
-	swprintf_s(szText, TEXT("HP : %0.f"), m_fHP);
+	swprintf_s(szText, TEXT("HP : %0.f"), m_fHP);			//체력 텍스트
 	TextOut(hDC, 10, 10, szText, lstrlen(szText));
 
-	Rectangle(hDC, 10, 30, 10 + m_fMaxHP * 4, 40); // 체력바
 
 
+	Rectangle(hDC, 10, 30, 10 + m_fMaxHP * 4, 36); // 체력바
 
-
-	MoveToEx(hDC, 10, 30, nullptr);
+	MoveToEx(hDC, 10, 35, nullptr);
 	for (int i = 0; i < m_fHP*4; i++)
 	{											//현재 체력
 		MoveToEx(hDC, 10 + i, 30, nullptr);
-		LineTo(hDC, 10 + i, 40);
+		LineTo(hDC, 10 + i, 36);
 	}
 
 #pragma endregion

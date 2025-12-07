@@ -2,6 +2,8 @@
 #include "CObjMgr.h"
 #include "CCollisionMgr.h"
 #include "CItem.h"
+#include "CBossMonster.h"
+#include "CAbstractFactory.h"
 
 CObjMgr* CObjMgr::m_pInstance = nullptr;
 int CObjMgr::iScore = 0;
@@ -62,6 +64,8 @@ CObj* CObjMgr::Create_Item(float x, float y)
 			return pItem;
 }
 
+
+
 void CObjMgr::Add_Object(OBJID eID, CObj* pObj)
 {
 	if (OBJ_END <= eID || pObj == nullptr)
@@ -104,6 +108,14 @@ void CObjMgr::Update()
 			}
 		}
 	}
+	static bool bSpawned = false;
+
+	if (iScore >= 30 && !bSpawned)
+	{
+		CObjMgr::Get_Instance()->Add_Object(OBJ_BOSSMONSTER, CAbstractFactory<CBossMonster>::
+			Create(400, 100));
+		bSpawned = true;
+	}
 }
 
 void CObjMgr::Late_Update()
@@ -116,12 +128,15 @@ void CObjMgr::Late_Update()
 		}
 	}
 
-	CCollisionMgr::Collision_Circle(m_ObjList[OBJ_MONSTER], m_ObjList[OBJ_BULLET]);
-	CCollisionMgr::Collision_Circle(m_ObjList[OBJ_MONSTER], m_ObjList[OBJ_SUBBULLET]);
+	CCollisionMgr::Collision_Rect(m_ObjList[OBJ_MONSTER], m_ObjList[OBJ_BULLET]);
+	CCollisionMgr::Collision_Rect(m_ObjList[OBJ_MONSTER], m_ObjList[OBJ_SUBBULLET]);
 	CCollisionMgr::Collision_Ultimate(m_ObjList[OBJ_MONSTER], m_ObjList[OBJ_ULTIMATE]);
 	CCollisionMgr::Collision_Ultimate(m_ObjList[OBJ_MONBULLET], m_ObjList[OBJ_ULTIMATE]);
-	CCollisionMgr::Collision_Circle(m_ObjList[OBJ_PLAYER], m_ObjList[OBJ_MONBULLET]);
+	CCollisionMgr::Collision_Rect(m_ObjList[OBJ_PLAYER], m_ObjList[OBJ_MONBULLET]);
 	CCollisionMgr::Collision_Item(m_ObjList[OBJ_PLAYER], m_ObjList[OBJ_ITEM]);
+	CCollisionMgr::Collision_Rect(m_ObjList[OBJ_BOSSMONSTER], m_ObjList[OBJ_BULLET]);
+	CCollisionMgr::Collision_Rect(m_ObjList[OBJ_BOSSMONSTER], m_ObjList[OBJ_SUBBULLET]);
+	//CCollisionMgr::Collision_Rect(m_ObjList[OBJ_BOSSMONSTER], m_ObjList[OBJ_ULTIMATE]);
 }
 
 void CObjMgr::Render(HDC hDC)
@@ -130,7 +145,7 @@ void CObjMgr::Render(HDC hDC)
 #pragma region 점수
 
 	TCHAR szText[32];
-	swprintf_s(szText, TEXT("점수 : % d"), CObjMgr::iScore);
+	swprintf_s(szText, TEXT("Kill : % d"), CObjMgr::iScore);
 	TextOut(hDC, 10, 50, szText, lstrlen(szText));
 #pragma endregion
 

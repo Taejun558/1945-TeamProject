@@ -48,37 +48,47 @@ int CMonster:: Update()
 
     __super::Update_Rect();
 
+
     if (m_tInfo.fY <= fLimitY)
     {
-        m_fSpeed = 3.f;
-    m_tInfo.fY += m_fSpeed;
+        m_fAngle = 90;
+        m_fSpeed = 2.f;                                             //몬스터 등장, 일정 선 이전까지 내려옴
+        m_tInfo.fX += m_fSpeed * cosf(m_fAngle * (PI / 180.f));
+        m_tInfo.fY += m_fSpeed * sinf(m_fAngle * (PI / 180.f));
     }
 
     if (m_tInfo.fY > fLimitY)
     {
         m_fSpeed = 0.5f;
-     
+                                                    //일정 선 도달 시 느려짐
         DWORD dwNow = GetTickCount();
 
 
         if (dwNow - m_dwLastFire > 3000)
         {
-            CObjMgr::Get_Instance()->Add_Object(OBJ_MONBULLET, Create_Bullet());
+            CObjMgr::Get_Instance()->Add_Object(OBJ_MONBULLET, Create_Bullet());        //3초마다 평타발사
+            m_fAngle = rand() % 361;                                                   //랜덤 무빙
             m_dwLastFire = dwNow;
 
-            m_fTargetX = m_tInfo.fX + (rand() % 200 - 100);
-            m_fTargetY = m_tInfo.fY + (rand() % 200 - 100);
+          /*  m_fTargetX = m_tInfo.fX + (rand() % 200 - 100);
+            m_fTargetY = m_tInfo.fY + (rand() % 200 - 100);*/
         }
 
-        float dx = m_fTargetX - m_tInfo.fX;
-        float dy = m_fTargetY - m_tInfo.fY;
-        float dist = sqrtf(dx * dx + dy * dy);
+        m_tInfo.fX += m_fSpeed * cosf(m_fAngle * (PI / 180.f));
+        m_tInfo.fY += m_fSpeed * sinf(m_fAngle * (PI / 180.f));
 
-        if (dist > 1.f)
-        {
-            m_tInfo.fX += dx / dist * m_fSpeed * (rand()%3-1);
-            m_tInfo.fY += dy / dist * m_fSpeed;
-        }
+        ResolveCollision();
+
+
+        //float dx = m_fTargetX - m_tInfo.fX;
+        //float dy = m_fTargetY - m_tInfo.fY;
+        //float dist = sqrtf(dx * dx + dy * dy);
+
+        //if (dist > 1.f)
+        //{
+        //    m_tInfo.fX += dx / dist * m_fSpeed * (rand()%3-1);
+        //    m_tInfo.fY += dy / dist * m_fSpeed;
+        //}
 
        // if (dwNow - m_dwLastFire > 3000)
        // {
@@ -99,7 +109,7 @@ int CMonster:: Update()
 
 void CMonster::Late_Update()
 {
-    srand(unsigned int(time(NULL)));
+    //srand(unsigned int(time(NULL)));
 }
 
 CObj* CMonster::Create_Bullet()
@@ -127,4 +137,34 @@ void CMonster::Render(HDC hDC)
 
 void CMonster::Release()
 {
+}
+
+
+void CMonster::ResolveCollision()
+{
+    float fRandAngle;
+    if (m_tRect.right >= WINCX)
+    {
+        m_tInfo.fX -= 10.f;
+        fRandAngle = rand() % 360;
+        m_fAngle = fRandAngle;
+    }
+    if (m_tRect.left <= 0)
+    {
+        m_tInfo.fX += 10.f;
+        fRandAngle = rand() % 360;
+        m_fAngle = fRandAngle;
+    }
+    if (m_tRect.top <= 0)
+    {
+        m_tInfo.fY += 10.f;
+        fRandAngle = rand() % 360;
+        m_fAngle = fRandAngle;
+    }
+    if (m_tRect.bottom >= WINCY)
+    {
+        m_tInfo.fY -= 10.f;
+        fRandAngle = rand() % 360;
+        m_fAngle = fRandAngle;
+    }
 }
